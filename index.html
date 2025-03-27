@@ -53,6 +53,7 @@
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            margin-bottom: 10px;
         }
 
         button:hover {
@@ -85,6 +86,7 @@
         <input type="text" id="token" placeholder="输入 token">
         <label for="api-url">API IP 地址:</label>
         <input type="text" id="api-url" placeholder="输入 API IP 地址" value="127.0.0.1:880">
+        <button onclick="saveData()">保存设置</button>
         <label for="video-url">视频链接:</label>
         <input type="text" id="video-url" placeholder="输入视频链接">
         <button onclick="sendRequest()">发送请求</button>
@@ -92,6 +94,18 @@
     </div>
 
     <script>
+        // 页面加载时尝试恢复数据
+        window.onload = function () {
+            const savedToken = localStorage.getItem('token');
+            const savedApiIp = localStorage.getItem('apiIp');
+            if (savedToken) {
+                document.getElementById('token').value = savedToken;
+            }
+            if (savedApiIp) {
+                document.getElementById('api-url').value = savedApiIp;
+            }
+        };
+
         function sendRequest() {
             const token = document.getElementById('token').value;
             const apiIp = document.getElementById('api-url').value;
@@ -116,6 +130,16 @@
                 resultDiv.textContent = "请求失败: " + error;
                 resultDiv.className = 'error';
             });
+        }
+
+        function saveData() {
+            const token = document.getElementById('token').value;
+            const apiIp = document.getElementById('api-url').value;
+            localStorage.setItem('token', token);
+            localStorage.setItem('apiIp', apiIp);
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = "设置已保存";
+            resultDiv.className = 'success';
         }
     </script>
 </body>
