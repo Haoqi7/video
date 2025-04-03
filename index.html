@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频链接提交</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 350px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        #result.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        #result.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>视频链接提交</h1>
+        <label for="token">Token:</label>
+        <input type="text" id="token" placeholder="输入 token">
+        <label for="api-url">API IP 地址:</label>
+        <input type="text" id="api-url" placeholder="输入 API IP 地址" value="127.0.0.1:880">
+        <button onclick="saveData()">保存设置</button>
+        <label for="video-url">视频链接:</label>
+        <input type="text" id="video-url" placeholder="输入视频链接">
+        <button onclick="sendRequest()">发送请求</button>
+        <div id="result"></div>
+        <div style="text-align: center; margin-top: 15px;">
+            <a href="video.html" style="color: #007BFF; text-decoration: none;">进入视频广场 →</a>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载时尝试恢复数据
+        window.onload = function () {
+            const savedToken = localStorage.getItem('token');
+            const savedApiIp = localStorage.getItem('apiIp');
+            if (savedToken) {
+                document.getElementById('token').value = savedToken;
+            }
+            if (savedApiIp) {
+                document.getElementById('api-url').value = savedApiIp;
+            }
+        };
+
+        function sendRequest() {
+            const token = document.getElementById('token').value;
+            const apiIp = document.getElementById('api-url').value;
+            const videoUrl = document.getElementById('video-url').value;
+            const apiUrl = `https://${apiIp}/api/processingVideos`;
+
+            fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: "token=" + encodeURIComponent(token) + "&video=" + encodeURIComponent(videoUrl)
+            })
+           .then(response => response.json())
+           .then(data => {
+                const resultDiv = document.getElementById('result');
+                resultDiv.textContent = "请求成功: " + JSON.stringify(data);
+                resultDiv.className = 'success';
+            })
+           .catch(error => {
+                const resultDiv = document.getElementById('result');
+                resultDiv.textContent = "请求失败: " + error;
+                resultDiv.className = 'error';
+            });
+        }
+
+        function saveData() {
+            const token = document.getElementById('token').value;
+            const apiIp = document.getElementById('api-url').value;
+            localStorage.setItem('token', token);
+            localStorage.setItem('apiIp', apiIp);
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = "设置已保存";
+            resultDiv.className = 'success';
+        }
+    </script>
+</body>
+
+</html>    
