@@ -1,7 +1,20 @@
 {
-    "routes": [
-      { "src": "/api/.*", "dest": "/api/proxy.js" },
-      { "src": ".*", "dest": "/public/index.html" }
-    ]
+
+    
+        "functions": {
+          "api/proxy.js": {
+            "memory": 1024,
+            "maxDuration": 15
+          }
+        },
+        "routes": [
+          {
+            "src": "/api/proxy",
+            "dest": "/api/proxy.js",
+            "methods": ["POST", "OPTIONS"]
+          }
+        ]
+      
+      
   }
   

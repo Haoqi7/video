@@ -192,6 +192,7 @@
         if (!token || !apiIp) return alert('请先设置Token和API地址');
 
         try {
+            
             // 构造目标API地址（保留用户自定义能力）
             const targetApi = `https://${apiIp}/api/findVideos`;
             
@@ -216,11 +217,19 @@
             console.error('API Error:', data);
             alert(`请求失败: ${data?.error || '未知错误'}`);
             }
-        } catch (e) {
-            console.error('Connection Error:', e);
-            alert('网络连接异常，请检查API地址');
-        }
-        }
+            } catch (e) {
+                console.error('完整请求日志:', {
+                apiIp,
+                token: token ? '存在' : '未设置',
+                error: e.stack || e
+                });
+                
+                alert(`请求失败，请检查：
+                1. API地址是否正确（当前：${apiIp}）
+                2. 服务器是否可用
+                3. 控制台查看详细日志`);
+            }
+            }
 
 
         // 渲染视频
