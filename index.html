@@ -192,7 +192,7 @@
             if(!token || !apiIp) return alert('请先设置Token和API地址');
 
             try {
-                const response = await fetch(`http://${apiIp}/api/findVideos`, {
+                const response = await fetch(`https://${apiIp}/api/findVideos`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
@@ -246,7 +246,7 @@
             const token = document.getElementById('token').value;
             const apiIp = document.getElementById('api-url').value;
             const videoUrl = document.getElementById('video-url').value;
-            const apiUrl = `http://${apiIp}/api/processingVideos`;
+            const apiUrl = `https://${apiIp}/api/processingVideos`;
 
             fetch(apiUrl, {
                 method: "POST",
