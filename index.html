@@ -3,83 +3,145 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>视频链接提交</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>视频管理</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
         }
 
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 350px;
-        }
-
-        h1 {
-            text-align: center;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            background-color: #f5f5f5;
             color: #333;
         }
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #666;
+        /* 首页样式 */
+        .container {
+            background: #fff;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+            text-align: center;
         }
 
         input[type="text"] {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
         }
 
         button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007BFF;
-            color: #fff;
+            background: #007BFF;  /* 主要按钮颜色 */
+            color: white;
             border: none;
-            border-radius: 4px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-bottom: 10px;
+            width: 100%;
+            transition: opacity 0.2s;
         }
 
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        #result {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 4px;
+        .switch-page {
+            color: #007BFF;       /* 链接文字颜色 */
             text-align: center;
+            margin: 15px 0;
+            cursor: pointer;
+            font-weight: 500;
         }
 
-        #result.success {
-            background-color: #d4edda;
-            color: #155724;
+        /* 视频页面样式 */
+        #videoPage {
+            display: none;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
-        #result.error {
-            background-color: #f8d7da;
-            color: #721c24;
+        .video-header {
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            background: #f5f5f5;
+            border-radius: 20px;
+            padding: 12px 20px;
+        }
+
+        .search-input {
+            background: none;
+            border: none;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        /* 视频网格布局 */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .video-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #e0e0e0;
+        }
+
+        .video-info {
+            padding: 12px;
+        }
+
+        .video-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        @media (max-width: 480px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .video-thumbnail {
+                height: 240px;
+            }
         }
     </style>
 </head>
 
+
 <body>
+    <!-- 原始页面 -->
     <div class="container">
         <h1>视频链接提交</h1>
         <label for="token">Token:</label>
@@ -90,58 +152,132 @@
         <label for="video-url">视频链接:</label>
         <input type="text" id="video-url" placeholder="输入视频链接">
         <button onclick="sendRequest()">发送请求</button>
+        <div class="switch-page" onclick="showPage('videoPage')">进入发现频道 →</div>
         <div id="result"></div>
     </div>
 
+    <!-- 视频页面 -->
+    <div id="videoPage">
+        <div class="video-header">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="搜索视频..." 
+                       id="searchInput" oninput="handleSearch()">
+            </div>
+        </div>
+        
+        <div class="video-grid" id="videoList"></div>
+        <div class="switch-page" onclick="showPage('container')">← 返回上传页面</div>
+    </div>
     <script>
-        // 页面加载时尝试恢复数据
+        // 固定参数配置
+        const FIXED_PARAMS = {
+            pageNo: 1,
+            pageSize: 10,
+            videoplatform: '' // 可根据需要设置固定值
+        };
+
+        // 页面切换
+        function showPage(pageId) {
+            document.querySelector('.container').style.display = 
+                pageId === 'container' ? 'block' : 'none';
+            document.getElementById('videoPage').style.display = 
+                pageId === 'videoPage' ? 'block' : 'none';
+            if(pageId === 'videoPage') loadVideos();
+        }
+
+        // 加载视频
+        async function loadVideos(searchText = '') {
+            const token = localStorage.getItem('token');
+            const apiIp = localStorage.getItem('apiIp');
+            if(!token || !apiIp) return alert('请先设置Token和API地址');
+
+            try {
+                const response = await fetch(`http://${apiIp}/api/findVideos`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        ...FIXED_PARAMS,
+                        token,
+                        videoname: searchText
+                    })
+                });
+                
+                const data = await response.json();
+                renderVideos(data.data);
+            } catch(e) {
+                console.error('加载失败:', e);
+            }
+        }
+
+        // 渲染视频
+        function renderVideos(videos) {
+            const container = document.getElementById('videoList');
+            container.innerHTML = videos.map(video => `
+                <div class="video-card">
+                    <video class="video-thumbnail" controls>
+                        <source src="${video.videoUrl}" type="video/mp4">
+                    </video>
+                    <div class="video-info">
+                        <div class="video-title">${video.videoname || '未命名视频'}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 搜索处理
+        let searchTimer;
+        function handleSearch() {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                loadVideos(document.getElementById('searchInput').value);
+            }, 500);
+        }
+
+
+        // 以下保持原有功能不变
         window.onload = function () {
             const savedToken = localStorage.getItem('token');
             const savedApiIp = localStorage.getItem('apiIp');
-            if (savedToken) {
-                document.getElementById('token').value = savedToken;
-            }
-            if (savedApiIp) {
-                document.getElementById('api-url').value = savedApiIp;
-            }
+            if(savedToken) document.getElementById('token').value = savedToken;
+            if(savedApiIp) document.getElementById('api-url').value = savedApiIp;
         };
 
         function sendRequest() {
             const token = document.getElementById('token').value;
             const apiIp = document.getElementById('api-url').value;
             const videoUrl = document.getElementById('video-url').value;
-            const apiUrl = `https://${apiIp}/api/processingVideos`;
+            const apiUrl = `http://${apiIp}/api/processingVideos`;
 
             fetch(apiUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 },
-                body: "token=" + encodeURIComponent(token) + "&video=" + encodeURIComponent(videoUrl)
+                body: new URLSearchParams({
+                    token,
+                    video: videoUrl
+                })
             })
-           .then(response => response.json())
-           .then(data => {
-                const resultDiv = document.getElementById('result');
-                resultDiv.textContent = "请求成功: " + JSON.stringify(data);
-                resultDiv.className = 'success';
+            .then(response => response.json())
+            .then(data => {
+                showResult("请求成功: " + JSON.stringify(data), 'success');
             })
-           .catch(error => {
-                const resultDiv = document.getElementById('result');
-                resultDiv.textContent = "请求失败: " + error;
-                resultDiv.className = 'error';
+            .catch(error => {
+                showResult("请求失败: " + error, 'error');
             });
         }
 
         function saveData() {
-            const token = document.getElementById('token').value;
-            const apiIp = document.getElementById('api-url').value;
-            localStorage.setItem('token', token);
-            localStorage.setItem('apiIp', apiIp);
+            localStorage.setItem('token', document.getElementById('token').value);
+            localStorage.setItem('apiIp', document.getElementById('api-url').value);
+            showResult("设置已保存", 'success');
+        }
+
+        function showResult(message, type) {
             const resultDiv = document.getElementById('result');
-            resultDiv.textContent = "设置已保存";
-            resultDiv.className = 'success';
+            resultDiv.textContent = message;
+            resultDiv.className = type;
         }
     </script>
 </body>
-
-</html>    
+</html>
