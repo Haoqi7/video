@@ -24,7 +24,7 @@ export default async (req, res) => {
       const data = await apiResponse.json();
       
       // 设置CORS头
-      res.setHeader('Access-Control-Allow-Origin', 'https://cs.haoqiyun.tk');
+      res.setHeader('Access-Control-Allow-Origin', 'https://video-peach-eight.vercel.app');
       res.status(200).json(data);
     } catch (error) {
       console.error('Proxy error:', error);
