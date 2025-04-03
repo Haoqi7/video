@@ -1,0 +1,7 @@
+{
+    "routes": [
+      { "src": "/api/.*", "dest": "/api/proxy.js" },
+      { "src": ".*", "dest": "/public/index.html" }
+    ]
+  }
+  
