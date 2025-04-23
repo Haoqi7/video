@@ -2,7 +2,8 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
     <title>视频播放</title>
     <style>
         /* 新增调试信息样式 */
@@ -13,11 +14,13 @@
             background: #f8f9fa;
             border-radius: 8px;
             word-break: break-all;
+            display: none;
         }
         .debug-title {
             color: #3b82f6;
             font-weight: bold;
             margin-bottom: 10px;
+            display: none;
         }
         body {
             display: flex;
@@ -25,16 +28,20 @@
             align-items: center;
             padding: 20px;
             background-color: #f3f4f6;
+            min-height: 100vh; /* 占据全屏高度 */
+            padding: 10px; /* 减少边距 */
         }
         .video-container {
             width: 100%;
             max-width: 800px;
             margin-top: 20px;
+            margin: auto; /* 垂直居中 */
         }
         video {
             width: 100%;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            aspect-ratio: 16/9; /* 锁定宽高比 */
         }
         .back-btn {
             padding: 10px 20px;

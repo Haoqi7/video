@@ -28,10 +28,19 @@ app.get('/proxy/video', async (req, res) => {
       targetUrl.searchParams.append('apptoken', token);
 
       const response = await axios({
-          method: 'get',
-          url: targetUrl.toString(),
-          responseType: 'stream'
+        method: req.method,
+        url: targetUrl.toString(),
+        data: params,
+        httpsAgent,
+        timeout: 5000, // 增加5秒超时
+        headers: {
+          ...req.headers, // 保留原始请求头
+          host: new URL(targetUrl).host, // 显式设置目标Host头
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': req.headers.authorization || ''
+        }
       });
+      
 
       response.data.pipe(res);
   } catch (error) {
@@ -49,7 +58,10 @@ const proxyRequest = async (req, res, targetUrl, params = {}) => {
       headers: req.headers
     });
 
-    const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+    const httpsAgent = new https.Agent({ 
+      rejectUnauthorized: false,
+      keepAlive: true // 启用keep-alive
+    });
     
     const response = await axios({
       method: req.method,
@@ -57,15 +69,14 @@ const proxyRequest = async (req, res, targetUrl, params = {}) => {
       data: params,
       httpsAgent,
       headers: {
+        ...req.headers, // 保留原始请求头
+        host: new URL(targetUrl).host, // 显式设置目标Host头
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': req.headers.authorization || ''
       }
     });
 
-    console.log('[PROXY] 响应数据:', {
-      status: response.status,
-      data: response.data
-    });
+
 
     res.json(response.data);
   } catch (error) {
@@ -124,7 +135,17 @@ app.get('/api/findVideos', async (req, res) => {
 
     // 平台过滤
     if (videoplatform) {
-      targetUrl.searchParams.append('videoplatform', videoplatform);
+      // 平台名称映射表（根据实际后端需求调整）
+      const platformMap = {
+        '抖音': '抖音',
+        '哔哩': '哔哩',
+        'twitter': 'twitter',
+        'YouTube': 'YouTube',
+        'instagram': 'instagram'
+      };
+      
+      const mappedPlatform = platformMap[videoplatform] || videoplatform;
+      targetUrl.searchParams.append('videoplatform', mappedPlatform);
     }
 
     console.log('[PROXY] 目标URL:', targetUrl.toString());
